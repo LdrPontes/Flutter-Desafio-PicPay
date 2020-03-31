@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -6,15 +8,23 @@ class ListUsersPage extends StatefulWidget {
   _ListUsersPageState createState() => _ListUsersPageState();
 }
 
-class _ListUsersPageState extends State<ListUsersPage> {
+class _ListUsersPageState extends State<ListUsersPage>
+    with AutomaticKeepAliveClientMixin {
   //!Arrumar o bug ao clicar no field. Mudar de setState.
 
-  bool isSearchBarFocused = false;
+  final _isSearchBarFocused = StreamController<bool>();
+
+  Sink<bool> get isFocusedIn => _isSearchBarFocused.sink;
+  Stream<bool> get isFocusedOut => _isSearchBarFocused.stream;
+
   var _backgroudColor = const Color(0xFF1D1E20);
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(backgroundColor: _backgroudColor, body: _body());
+    return Scaffold(
+        resizeToAvoidBottomInset: false,
+        backgroundColor: _backgroudColor,
+        body: _body());
   }
 
   Widget _body() {
@@ -22,18 +32,23 @@ class _ListUsersPageState extends State<ListUsersPage> {
       body: _listView(),
       headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
         return [
-          SliverAppBar(
-              centerTitle: false,
-              flexibleSpace: Container(
-                child: _headerTitle(),
-              ),
-              pinned: true,
-              expandedHeight: 164,
-              backgroundColor: _backgroudColor,
-              bottom: PreferredSize(
-                preferredSize: Size(20.0, 20.0),
-                child: _searchBar(),
-              ))
+          SliverOverlapAbsorber(
+            handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+                      child: SliverAppBar(
+                centerTitle: false,
+                flexibleSpace: Container(
+                  child: _headerTitle(),
+                ),
+                pinned: true,
+                elevation: 0,
+                expandedHeight: 164,
+                backgroundColor: _backgroudColor,
+                forceElevated: innerBoxIsScrolled,
+                bottom: PreferredSize(
+                  preferredSize: Size(45.0, 45.0),
+                  child: _searchBar(),
+                )),
+          ),
         ];
       },
     );
@@ -54,39 +69,35 @@ class _ListUsersPageState extends State<ListUsersPage> {
   Widget _searchBar() {
     return Container(
       child: GestureDetector(
-        onTap: () => {
-          //TODO Setar o estado pela viewModel
-          setState(() {
-            isSearchBarFocused = true;
-          })
-        },
+        onTap: () => {isFocusedIn.add(true)},
         child: Container(
-          width: double.infinity,
-          height: 45,
-          margin: EdgeInsets.fromLTRB(16, 8, 16, 8),
-          decoration: BoxDecoration(
-              color: const Color(0xFF2B2C2F),
-              borderRadius: BorderRadius.all(Radius.circular(100))),
-          child: isSearchBarFocused
-              ? _searchBarWithFocus()
-              : _searchBarWithoutFocus(),
-        ),
+            width: double.infinity,
+            height: 45,
+            margin: EdgeInsets.fromLTRB(16, 8, 16, 8),
+            decoration: BoxDecoration(
+                color: const Color(0xFF2B2C2F),
+                borderRadius: BorderRadius.all(Radius.circular(100))),
+            child: StreamBuilder<bool>(
+              initialData: false,
+              builder: (context, snapshot) {
+                return snapshot.data
+                    ? _searchBarWithFocus()
+                    : _searchBarWithoutFocus();
+              },
+              stream: isFocusedOut,
+            )),
       ),
     );
   }
 
   Widget _searchBarWithFocus() {
-    return TextField(
+    return TextFormField(
       autofocus: true,
       style: TextStyle(color: Colors.white),
       decoration: InputDecoration(
           contentPadding: EdgeInsets.all(8),
           suffixIcon: GestureDetector(
-            onTap: () => {
-              setState(() {
-                isSearchBarFocused = false;
-              })
-            },
+            onTap: () => {isFocusedIn.add(false)},
             child: Icon(
               Icons.close,
               color: Colors.white,
@@ -127,13 +138,14 @@ class _ListUsersPageState extends State<ListUsersPage> {
   }
 
   Widget _listView() {
-    return Container(
-        child: ListView.builder(
+    print("BuildListView");
+    return ListView.builder(
+      physics: ClampingScrollPhysics(),
       itemCount: 15,
       itemBuilder: (context, index) {
         return _listTile();
       },
-    ));
+    );
   }
 
   Widget _listTile() {
@@ -160,5 +172,14 @@ class _ListUsersPageState extends State<ListUsersPage> {
         ),
       ),
     );
+  }
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void dispose() {
+    super.dispose();
+    _isSearchBarFocused.close();
   }
 }
