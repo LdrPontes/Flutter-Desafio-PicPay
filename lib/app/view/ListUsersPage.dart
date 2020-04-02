@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:desafio_picpay/app/utils/SliverAppBarDelegate.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -10,7 +11,7 @@ class ListUsersPage extends StatefulWidget {
 
 class _ListUsersPageState extends State<ListUsersPage>
     with AutomaticKeepAliveClientMixin {
-  //!Arrumar o bug ao clicar no field. Mudar de setState.
+  //!Trocar Streams pelo MobX
 
   final _isSearchBarFocused = StreamController<bool>();
 
@@ -21,42 +22,40 @@ class _ListUsersPageState extends State<ListUsersPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        resizeToAvoidBottomInset: false,
-        backgroundColor: _backgroudColor,
-        body: _body());
+    return Scaffold(backgroundColor: _backgroudColor, body: _body());
   }
 
   Widget _body() {
-    return NestedScrollView(
-      body: _listView(),
-      headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-        return [
-          SliverOverlapAbsorber(
-            handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                      child: SliverAppBar(
-                centerTitle: false,
-                flexibleSpace: Container(
-                  child: _headerTitle(),
-                ),
-                pinned: true,
-                elevation: 0,
-                expandedHeight: 164,
-                backgroundColor: _backgroudColor,
-                forceElevated: innerBoxIsScrolled,
-                bottom: PreferredSize(
-                  preferredSize: Size(45.0, 45.0),
-                  child: _searchBar(),
-                )),
+    return SafeArea(
+      child: CustomScrollView(
+        slivers: <Widget>[
+          SliverAppBar(
+            centerTitle: false,
+            flexibleSpace: Container(
+              child: _headerTitle(),
+            ),
+            elevation: 0,
+            expandedHeight: 108,
+            backgroundColor: _backgroudColor,
           ),
-        ];
-      },
+          SliverPersistentHeader(
+            pinned: true,
+            delegate: SliverAppBarDelegate(
+              PreferredSize(
+                preferredSize: Size(double.infinity, 60.0),
+                child: Container(color: _backgroudColor, child: _searchBar()),
+              ),
+            ),
+          ),
+          _listView()
+        ],
+      ),
     );
   }
 
   Widget _headerTitle() {
     return Container(
-      margin: EdgeInsets.fromLTRB(20, 70, 20, 16),
+      margin: EdgeInsets.fromLTRB(20, 50, 0, 16),
       child: Text("Contatos",
           style: GoogleFonts.roboto(
             color: Colors.white,
@@ -93,10 +92,11 @@ class _ListUsersPageState extends State<ListUsersPage>
   Widget _searchBarWithFocus() {
     return TextFormField(
       autofocus: true,
+      showCursor: false,
       style: TextStyle(color: Colors.white),
       decoration: InputDecoration(
           contentPadding: EdgeInsets.all(8),
-          suffixIcon: GestureDetector(
+          suffixIcon: InkWell(
             onTap: () => {isFocusedIn.add(false)},
             child: Icon(
               Icons.close,
@@ -138,13 +138,14 @@ class _ListUsersPageState extends State<ListUsersPage>
   }
 
   Widget _listView() {
-    print("BuildListView");
-    return ListView.builder(
-      physics: ClampingScrollPhysics(),
-      itemCount: 15,
-      itemBuilder: (context, index) {
-        return _listTile();
-      },
+    return SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (BuildContext context, int index) {
+          return _listTile();
+        },
+        childCount: 15,
+        addAutomaticKeepAlives: true,
+      ),
     );
   }
 
