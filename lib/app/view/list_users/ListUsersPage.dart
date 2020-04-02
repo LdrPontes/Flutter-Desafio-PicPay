@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:desafio_picpay/app/utils/AppColors.dart';
 import 'package:desafio_picpay/app/utils/SliverAppBarDelegate.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -18,11 +19,9 @@ class _ListUsersPageState extends State<ListUsersPage>
   Sink<bool> get isFocusedIn => _isSearchBarFocused.sink;
   Stream<bool> get isFocusedOut => _isSearchBarFocused.stream;
 
-  var _backgroudColor = const Color(0xFF1D1E20);
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(backgroundColor: _backgroudColor, body: _body());
+    return Scaffold(backgroundColor: AppColors.backgroudColor, body: _body());
   }
 
   Widget _body() {
@@ -36,14 +35,14 @@ class _ListUsersPageState extends State<ListUsersPage>
             ),
             elevation: 0,
             expandedHeight: 108,
-            backgroundColor: _backgroudColor,
+            backgroundColor: AppColors.backgroudColor,
           ),
           SliverPersistentHeader(
             pinned: true,
             delegate: SliverAppBarDelegate(
               PreferredSize(
                 preferredSize: Size(double.infinity, 60.0),
-                child: Container(color: _backgroudColor, child: _searchBar()),
+                child: Container(color: AppColors.backgroudColor, child: _searchBar()),
               ),
             ),
           ),

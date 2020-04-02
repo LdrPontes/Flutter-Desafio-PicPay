@@ -3,7 +3,9 @@ import 'package:desafio_picpay/domain/usecases/UseCase.dart';
 
 class ListUserUseCase extends UseCase<List<User>, void> {
   @override
-  Stream<List<User>> buildUseCaseStream(void params) async* {
-    
+  Future<Stream<List<User>>> buildUseCaseStream(void params) {
+    // TODO: implement buildUseCaseStream
+    return null;
   }
+
 }

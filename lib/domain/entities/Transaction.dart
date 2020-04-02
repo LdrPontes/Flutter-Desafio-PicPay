@@ -1,15 +1,30 @@
-import 'package:desafio_picpay/domain/entities/Card.dart';
+import 'package:desafio_picpay/domain/entities/User.dart';
 
 class Transaction {
-  Card _card;
-  double _value;
-  int _destinationUserId;
+  int id;
+  User destinationUser;
+  bool sucess;
+  String status;
+  double value;
+  int timestamp;
 
-  double get value => _value;
+  int get getId => id;
 
-  set value(double value) => _value = value;
+  set setId(int id) => this.id = id;
 
-  int get destinationUserId => _destinationUserId;
+  bool get getSucess => sucess;
 
-  set destinationUserId(int value) => _destinationUserId = value;
+  set setSucess(bool sucess) => this.sucess = sucess;
+
+  String get getStatus => status;
+
+  set setStatus(String status) => this.status = status;
+
+  double get getValue => value;
+
+  set setValue(double value) => this.value = value;
+
+  int get getTimestamp => timestamp;
+
+  set setTimestamp(int timestamp) => this.timestamp = timestamp;
 }

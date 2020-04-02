@@ -1,4 +1,4 @@
-import 'package:desafio_picpay/app/view/ListUsersPage.dart';
+import 'package:desafio_picpay/app/view/list_users/ListUsersPage.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(MyApp());
@@ -8,13 +8,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        accentColor: Colors.white,
-        cursorColor: Colors.white,
-      ),
-      home: ListUsersPage(),
-    );
+        initialRoute: '/',
+        routes: {
+          '/': (context) =>  ListUsersPage(),
+        },
+        debugShowCheckedModeBanner: false,
+        title: 'Desafio PicPay',
+        theme: ThemeData(
+          accentColor: Colors.white,
+          cursorColor: Colors.white,
+        ));
   }
 }
