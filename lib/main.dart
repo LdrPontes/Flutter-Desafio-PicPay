@@ -1,7 +1,11 @@
 import 'package:desafio_picpay/app/view/list_users/ListUsersPage.dart';
+import 'package:desafio_picpay/modules.dart';
 import 'package:flutter/material.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  startModules();
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -10,7 +14,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
         initialRoute: '/',
         routes: {
-          '/': (context) =>  ListUsersPage(),
+          '/': (context) => ListUsersPage(),
         },
         debugShowCheckedModeBanner: false,
         title: 'Desafio PicPay',

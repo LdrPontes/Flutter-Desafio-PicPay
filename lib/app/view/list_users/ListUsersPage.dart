@@ -2,7 +2,10 @@ import 'dart:async';
 
 import 'package:desafio_picpay/app/utils/AppColors.dart';
 import 'package:desafio_picpay/app/utils/SliverAppBarDelegate.dart';
+import 'package:desafio_picpay/app/view/list_users/ListUsersViewModel.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:get_it/get_it.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ListUsersPage extends StatefulWidget {
@@ -12,12 +15,20 @@ class ListUsersPage extends StatefulWidget {
 
 class _ListUsersPageState extends State<ListUsersPage>
     with AutomaticKeepAliveClientMixin {
-  //!Trocar Streams pelo MobX
+  final model = GetIt.I<ListUsersViewModel>();
 
-  final _isSearchBarFocused = StreamController<bool>();
+  TextEditingController controller = new TextEditingController();
 
-  Sink<bool> get isFocusedIn => _isSearchBarFocused.sink;
-  Stream<bool> get isFocusedOut => _isSearchBarFocused.stream;
+  @override
+  void initState() {
+    super.initState();
+    model.getUsers();
+
+    controller.addListener(() {
+      print("Chamou Listener");
+      model.setFilter(controller.text);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +53,8 @@ class _ListUsersPageState extends State<ListUsersPage>
             delegate: SliverAppBarDelegate(
               PreferredSize(
                 preferredSize: Size(double.infinity, 60.0),
-                child: Container(color: AppColors.backgroudColor, child: _searchBar()),
+                child: Container(
+                    color: AppColors.backgroudColor, child: _searchBar()),
               ),
             ),
           ),
@@ -67,7 +79,7 @@ class _ListUsersPageState extends State<ListUsersPage>
   Widget _searchBar() {
     return Container(
       child: GestureDetector(
-        onTap: () => {isFocusedIn.add(true)},
+        onTap: () => {model.setFocus(true)},
         child: Container(
             width: double.infinity,
             height: 45,
@@ -75,14 +87,12 @@ class _ListUsersPageState extends State<ListUsersPage>
             decoration: BoxDecoration(
                 color: const Color(0xFF2B2C2F),
                 borderRadius: BorderRadius.all(Radius.circular(100))),
-            child: StreamBuilder<bool>(
-              initialData: false,
-              builder: (context, snapshot) {
-                return snapshot.data
+            child: Observer(
+              builder: (BuildContext context) {
+                return model.isFocused
                     ? _searchBarWithFocus()
                     : _searchBarWithoutFocus();
               },
-              stream: isFocusedOut,
             )),
       ),
     );
@@ -90,13 +100,17 @@ class _ListUsersPageState extends State<ListUsersPage>
 
   Widget _searchBarWithFocus() {
     return TextFormField(
+      controller: controller,
       autofocus: true,
       showCursor: false,
       style: TextStyle(color: Colors.white),
       decoration: InputDecoration(
           contentPadding: EdgeInsets.all(8),
           suffixIcon: InkWell(
-            onTap: () => {isFocusedIn.add(false)},
+            onTap: () {
+              controller.clear();
+              model.setFocus(false);
+            },
             child: Icon(
               Icons.close,
               color: Colors.white,
@@ -137,36 +151,42 @@ class _ListUsersPageState extends State<ListUsersPage>
   }
 
   Widget _listView() {
-    return SliverList(
-      delegate: SliverChildBuilderDelegate(
-        (BuildContext context, int index) {
-          return _listTile();
-        },
-        childCount: 15,
-        addAutomaticKeepAlives: true,
-      ),
+    return Observer(
+      builder: (BuildContext context) {
+        var users = model.users;
+        return SliverList(
+          delegate: SliverChildBuilderDelegate(
+            (BuildContext context, int index) {
+              return _listTile(
+                  users[index].name, users[index].img, users[index].username);
+            },
+            childCount: users.length,
+            addAutomaticKeepAlives: true,
+          ),
+        );
+      },
     );
   }
 
-  Widget _listTile() {
+  Widget _listTile(String name, String img, String username) {
     return Container(
       margin: EdgeInsets.fromLTRB(4, 12, 0, 0),
       child: ListTile(
         leading: ClipRRect(
           borderRadius: BorderRadius.circular(100),
           child: Image.network(
-            "https://randomuser.me/api/portraits/women/37.jpg",
+            img,
             height: 52,
             width: 52,
           ),
         ),
         title: Text(
-          "@marina.coelho",
+          username,
           style: GoogleFonts.roboto(
               color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
         ),
         subtitle: Text(
-          "Marina Coelho",
+          name,
           style: GoogleFonts.roboto(
               color: Color.fromARGB(127, 255, 255, 255), fontSize: 14),
         ),
@@ -176,10 +196,4 @@ class _ListUsersPageState extends State<ListUsersPage>
 
   @override
   bool get wantKeepAlive => true;
-
-  @override
-  void dispose() {
-    super.dispose();
-    _isSearchBarFocused.close();
-  }
 }
