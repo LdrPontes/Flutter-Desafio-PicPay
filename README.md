@@ -1,7 +1,8 @@
 # Desafio PicPay
 
 Esse desafio foi desenvolvido com o intuito de apresentar alguns conhecimentos e features do Flutter. Qualquer sugestão ou crítica é bem vinda! :D
-O desafio original é para ser desenvolvido em Android ou iOS.
+
+O desafio original consiste em desenvolver o aplicativo em Android ou iOS.
 
 Contato: https://www.linkedin.com/in/ldrpontes/
 
